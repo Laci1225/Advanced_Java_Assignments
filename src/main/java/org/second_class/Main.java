@@ -70,6 +70,10 @@ public class Main {
                 default -> throw new IllegalArgumentException("Invalid day of week");
             };
         }
+        public static Weekday getWeekday2(int month, int day){
+            return Weekday.values()[new GregorianCalendar(new GregorianCalendar().get(Calendar.YEAR), month, day).get(Calendar.DAY_OF_WEEK) - 1];
+        }
+
         public String getHungarianName() {
             return hungarianName;
         }
