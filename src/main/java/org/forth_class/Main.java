@@ -1,8 +1,11 @@
 package org.forth_class;
 
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.function.*;
+import java.util.stream.IntStream;
 
 enum Weekday {
     SUNDAY("vasárnap"),
@@ -31,6 +34,29 @@ public class Main {
         int[] index = {Weekday.MONDAY.ordinal()};
         return () -> Weekday.values()[index[0]++ % 7];
     }
+    public static int[] createArray(int length, IntUnaryOperator f) {
+        return IntStream.range(0,length).map(f).toArray();
+    }
+
+    public static int[][] createArrayBi(int length, IntBinaryOperator f) {
+        return IntStream.range(0,length)
+                .mapToObj(i -> IntStream.range(0, i)
+                        .map(j -> f.applyAsInt(i,j))
+                        .toArray())
+                .toArray(int[][]::new);
+    }
+    public static IntFunction<Integer> compose(IntFunction<Integer> f, IntFunction<Integer> g) {
+        return x -> g.apply(f.apply(x));
+
+    }
+    public static BiFunction<Function<Integer,Integer>, Integer, Function<Integer,Integer>> iterate=
+            //(fun, count) -> n -> {
+            //    for (int i = 0; i < count; i++) {
+            //        n = fun.apply(n);}
+            //    return n;
+            //};
+            (fun, count) -> n -> IntStream.range(0, count).reduce(n, (acc, i) -> fun.apply(acc));
+
 
     public static void main(String[] args) {
         System.out.println("Hello, World!");
@@ -43,13 +69,26 @@ public class Main {
 
         Supplier<Weekday> nextDaySupplier = getNextDay();
         System.out.println(nextDaySupplier.get());
-        System.out.println(nextDaySupplier.get());
-        System.out.println(nextDaySupplier.get());
-        System.out.println(nextDaySupplier.get());
-        System.out.println(nextDaySupplier.get());
-        System.out.println(nextDaySupplier.get());
-        System.out.println(nextDaySupplier.get());
-        System.out.println(nextDaySupplier.get());
+
+        //Sort the command line arguments based on the number of 'a' characters in them.
+        args = new String[]  {"apple", "banana", "cherry", "date", "elderberry", "fig", "grape"};
+        //Sort the command line arguments based on the number of 'a' characters in them.
+        System.out.println(args);
+
+        Arrays.sort( args,Comparator.comparing((String s) -> s.chars().filter(c -> c == 'a').count()).reversed());
+        System.out.println(Arrays.toString(args));
+        //Sort the command line arguments so that those arguments that contains names of weekdays come first.
+        args = new String[] {"MONDAY", "TUEASD" , "ASDFRINDAY", "ASDFRIDAYASD", "ASDASD"};
+        var newArgs = Arrays.stream(args).sorted(
+                Comparator.comparing((String s) -> Arrays.stream(Weekday.values())
+                                .anyMatch(weekday -> s.contains(weekday.name()))).reversed()
+        ).toArray(String[]::new);
+        System.out.println(Arrays.toString(newArgs));
+
+        System.out.println(Arrays.toString(createArray(10, i -> i * 2)));
+        System.out.println(Arrays.deepToString(createArrayBi(10, (i, j) -> i * j)));
+
+        System.out.println(compose(x -> x + 1, x -> x * 2).apply(5));
     }
 };
 
